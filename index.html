@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub User Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fab fa-github"></i>
+                <span>GitHub User Finder</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Enter GitHub username..." id="username-input" />
+                <i id="clearBtn" class="fa-solid fa-xmark"></i>
+                <button class="search-btn" id="search-btn" onclick="checkUser()">Search</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Searching GitHub...</p>
+        </div>
+
+        <div class="error-message" id="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <h3>User not found</h3>
+            <p>Please check the username and try again.</p>
+        </div>
+
+        <div class="user-profile" id="user-profile"></div>
+
+        <div class="repos-container" id="repos-container">
+            <div class="loading" id="loadingRepos">
+                <div class="spinner"></div>
+                <p>Searching Repositories...</p>
+            </div>
+            <h2 class="section-title" id="section-title"><i class="fas fa-code-branch"></i> Recent Repositories</h2>
+            <div class="repos-grid" id="repos-grid">
+            </div>
+        </div>
+    </main>
+
+    <footer class="fixed" id="footer">
+        <div class="container">
+            <p>GitHub User Finder &copy; 2025 | GitHub API</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
