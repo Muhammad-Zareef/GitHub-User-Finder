@@ -8,8 +8,17 @@ const loading = document.getElementById('loading');
 const reposGrid = document.getElementById('repos-grid');
 const loadingRepos = document.getElementById('loadingRepos');
 const errorMessage = document.getElementById('error-message');
-const clearBtn = document.getElementById("clearBtn");
-clearBtn.style.display = "none";
+const repoPageInfo = document.getElementById('repoPageInfo');
+const reposContainer = document.getElementById('repos-container');
+const paginationContainer = document.getElementById('pagination-container');
+const prevRepo = document.getElementById('prevRepo');
+const nextRepo = document.getElementById('nextRepo');
+const clearBtn = document.getElementById('clearBtn');
+const GITHUB_TOKEN = "";
+clearBtn.style.display = 'none';
+let repoPage = 1;
+const reposPerPage = 27;
+let currentUsername = "";
 
 userNameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') checkUser();
@@ -30,6 +39,7 @@ function checkUser() {
     errorMessage.style.display = 'none';
     sectionTitle.style.display = 'none';
     reposGrid.style.display = 'none';
+    paginationContainer.style.display = 'none';
     footer.className = 'fixed';
     loading.style.display = 'block';
     if (!userNameInput.value.trim()) {
@@ -46,40 +56,29 @@ function checkUser() {
             return;
         }
         renderUserProfile(res);
+        repoPage = 1;
+        repoPageInfo.textContent = `Page ${repoPage}`;
         footer.className = 'footer';
-        loadingRepos.style.display = 'block';
-        const repos = getUserRepos(res.repos_url);
-        repos.then((res) => {
-            res.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            displayRepos(res);
-        }).catch((error) => {
-            console.log(error);
-        });
+        fetchRepos(userNameInput.value.trim());
     }).catch((error) => {
-        console.log(error);
+        console.error(error);
     });
 }
 
 async function getUserData(URL) {
     try {
-        const response = await fetch(URL);
+        const response = await fetch(URL, {
+            headers: {
+                Authorization: `token ${GITHUB_TOKEN}`
+            }
+        });
         if (response.status == 404) {
             return false;
         }
         const data = await response.json();
         return data;
     } catch (error) {
-        console.log('Error: ', error);
-    }
-}
-
-async function getUserRepos(URL) {
-    try {
-        const response = await fetch(URL);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.log('Error: ', error);
+        console.error('Error: ', error);
     }
 }
 
@@ -172,3 +171,41 @@ function displayRepos(repos) {
         `;
     });
 }
+
+function fetchRepos(username) {
+    sectionTitle.style.display = 'none';
+    reposGrid.innerHTML = '';
+    loadingRepos.style.display = 'block';
+    currentUsername = username;
+    fetch(`https://api.github.com/users/${username}/repos?per_page=${reposPerPage}&page=${repoPage}&sort=updated`, {
+        headers: {
+            Authorization: `token ${GITHUB_TOKEN}`
+        }
+    })
+    .then(res => res.json())
+    .then(repos => {
+        paginationContainer.style.display = 'flex';
+        repoPageInfo.textContent = `Page ${repoPage}`;
+        displayRepos(repos);
+        setTimeout(() => {
+            reposContainer.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }, 100);
+        prevRepo.disabled = repoPage === 1;
+        nextRepo.disabled = repos.length < reposPerPage;
+    });
+}
+
+prevRepo.addEventListener("click", () => {
+    if (repoPage > 1) {
+        repoPage--;
+        fetchRepos(currentUsername);
+    }
+});
+
+nextRepo.addEventListener("click", () => {
+    repoPage++;
+    fetchRepos(currentUsername);
+});
